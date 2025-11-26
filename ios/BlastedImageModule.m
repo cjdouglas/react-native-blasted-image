@@ -142,7 +142,18 @@ RCT_EXPORT_MODULE(BlastedImage);
         }
 
         url = [NSURL URLWithString:imageUrl];
-        
+
+        // If URL creation failed (e.g., contains unencoded spaces or special characters),
+        // try percent-encoding the string. This handles URLs that work on Android but fail on iOS.
+        if (!url) {
+            NSString *encodedUrlString = [imageUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+            url = [NSURL URLWithString:encodedUrlString];
+
+            if (showLog && url) {
+                [self sendEventWithName:@"BlastedEventLog" message:[NSString stringWithFormat:@"URL required encoding: %@", encodedUrlString]];
+            }
+        }
+
         // Configure headers if provided
         if (headers && [headers isKindOfClass:[NSDictionary class]] && headers.count > 0) {
             if (showLog) {
