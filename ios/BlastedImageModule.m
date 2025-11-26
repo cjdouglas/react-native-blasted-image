@@ -177,7 +177,8 @@ RCT_EXPORT_METHOD(loadImage:(NSString *)imageUrl
     NSURL *url = [self prepareUrl:imageUrl hybridAssets:hybridAssets cloudUrl:cloudUrl headers:headers showLog:YES];
 
     // Is skip skipMemoryCache set for image and should we store it only to disk?
-    SDWebImageOptions options = 0;
+    // Always retry failed URLs (SDWebImage blacklists URLs that fail, preventing retries)
+    SDWebImageOptions options = SDWebImageRetryFailed;
     if (skipMemoryCache) {
         options |= SDWebImageAvoidAutoSetImage;
     }

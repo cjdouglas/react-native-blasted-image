@@ -88,19 +88,22 @@ RCT_CUSTOM_VIEW_PROPERTY(source, NSDictionary, UIImageView) {
             context = @{SDWebImageContextDownloadRequestModifier: requestModifier};
         }
 
+        // Use SDWebImageRetryFailed to retry URLs that were previously blacklisted
+        SDWebImageOptions options = SDWebImageRetryFailed;
+
         if (!storedTintColor) {
             if (context) {
-                [[SDWebImageManager sharedManager] loadImageWithURL:url options:0 context:context progress:nil completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                [[SDWebImageManager sharedManager] loadImageWithURL:url options:options context:context progress:nil completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                     if (image) {
                         view.image = image;
                     }
                 }];
             } else {
-                [view sd_setImageWithURL:url];
+                [view sd_setImageWithURL:url placeholderImage:nil options:options];
             }
         } else {
             if (context) {
-                [[SDWebImageManager sharedManager] loadImageWithURL:url options:0 context:context progress:nil completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                [[SDWebImageManager sharedManager] loadImageWithURL:url options:options context:context progress:nil completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                     if (error) return;
 
                     dispatch_async(dispatch_get_main_queue(), ^{
@@ -110,7 +113,7 @@ RCT_CUSTOM_VIEW_PROPERTY(source, NSDictionary, UIImageView) {
                     });
                 }];
             } else {
-                [view sd_setImageWithURL:url completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+                [view sd_setImageWithURL:url placeholderImage:nil options:options completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
                     if (error) return;
 
                     dispatch_async(dispatch_get_main_queue(), ^{
